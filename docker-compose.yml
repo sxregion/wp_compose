@@ -14,8 +14,6 @@ services:
       - "traefik.http.routers.webserver.rule=Host(`$MAIN_DOMAIN_NAME`)"
     depends_on:
       - mysqld
-#    networks:
-#      default:
 
   mysqld:
     env_file:
