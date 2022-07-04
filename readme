@@ -1,0 +1,17 @@
+Docker compose for simple Wordpress Site
+
+Includes:
+
+Apache2 webserver
+Mysql DB
+Traefik Reverse Proxy
+
+By default its build an wordpress ready to Install. ./mysqld/backup/ creates DB and user. 
+Another way, you can use your own Backup of website. You can put Mysql dump to folder ./mysqld/backup/ and it will be restored to database with name and user stored at dockerfile. Also you might have to use alter.sql to allow connection to db using password. Just change username and password in ./mysqld/backup/alter.sql before building. 
+Unpack your website files backup in ./webserver/website folder.
+
+In .env file stored a lot of default environments. Look at MAIN_DOMAIN_NAME - its domain of your website that used to access via traefik.  
+
+
+
+

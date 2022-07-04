@@ -1,0 +1,8 @@
+FROM mysql:latest
+ENV MYSQL_ROOT_PASSWORD=ChangeMe
+ENV MYSQL_DATABASE=wp_data
+ENV MYSQL_USER=db_usr
+ENV MYSQL_PASSWORD=ChangeMeToo
+ADD backup/* /docker-entrypoint-initdb.d/
+RUN echo "bind-address = 0.0.0.0" >> /etc/mysql/my.cnf
+EXPOSE 3306/tcp
