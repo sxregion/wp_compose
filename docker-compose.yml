@@ -1,0 +1,51 @@
+version: "3.3"
+services:
+  web:
+    env_file:
+      - '.env'
+    build: 
+      context: ./webserver/
+      dockerfile: dockerfile
+    image: ${REGISTRY}web:${RELEASE}
+    #volumes:
+    #  - ./webserver/website/:/var/www/html
+    labels: 
+      - "traefik.enable=true"
+      - "traefik.http.routers.webserver.rule=Host(`$MAIN_DOMAIN_NAME`)"
+    depends_on:
+      - mysqld
+#    networks:
+#      default:
+
+  mysqld:
+    env_file:
+      - '.env'
+    build: 
+      context: ./mysqld/
+      dockerfile: dockerfile
+    image: ${REGISTRY}mysqld:${RELEASE}
+    volumes: 
+      - ./db_data:/var/lib/mysql/
+    labels:
+      - "traefik.enable=false"
+    hostname: mysqld.local
+    networks:
+      default:
+        aliases:
+        - mysqld
+
+  traefik:
+    image: 'traefik:latest'
+    ports:
+      - "80:80"
+      - "8080:8080"
+    env_file:
+      - '.env'
+    command:
+       - "--api.insecure=true"
+       - "--providers.docker=true"
+       - "--providers.docker.exposedbydefault=false"
+       
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # - ./traefik/traefik.yaml:/etc/traefik/traefik.yml
