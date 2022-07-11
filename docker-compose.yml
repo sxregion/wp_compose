@@ -6,14 +6,16 @@ services:
     build: 
       context: ./webserver/
       dockerfile: dockerfile
-    image: web:${BUILD_VERSION}
-    volumes:
-      - ./webserver/website/:/var/www/html
+    image: ${REGISTRY}web:${RELEASE}
+    #volumes:
+    #  - ./webserver/website/:/var/www/html
     labels: 
       - "traefik.enable=true"
       - "traefik.http.routers.webserver.rule=Host(`$MAIN_DOMAIN_NAME`)"
     depends_on:
       - mysqld
+#    networks:
+#      default:
 
   mysqld:
     env_file:
@@ -21,7 +23,7 @@ services:
     build: 
       context: ./mysqld/
       dockerfile: dockerfile
-    image: mysqld:${BUILD_VERSION}
+    image: ${REGISTRY}mysqld:${RELEASE}
     volumes: 
       - ./db_data:/var/lib/mysql/
     labels:
@@ -39,6 +41,11 @@ services:
       - "8080:8080"
     env_file:
       - '.env'
+    command:
+       - "--api.insecure=true"
+       - "--providers.docker=true"
+       - "--providers.docker.exposedbydefault=false"
+       
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik/traefik.yaml:/etc/traefik/traefik.yml
+      # - ./traefik/traefik.yaml:/etc/traefik/traefik.yml

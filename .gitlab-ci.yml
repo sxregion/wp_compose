@@ -1,0 +1,43 @@
+#My test CI file for build and deploy
+image: 
+  name: "docker:dind"
+
+variables:
+  SERVER_IP: "185.91.53.35"
+  SERVER_USER: "root"
+  CR_TOKEN: "CRgAAAAAuVdm-Bk0D1LKuIOhsvfnquhqX8iIMi42"
+  RELEASE: "1.2"
+  DOCKER_HOST: unix:///var/run/docker.sock
+  
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script: 
+    - echo "RELEASE=$RELEASE" >> .env
+    - docker login cr.selcloud.ru -u token -p $CR_TOKEN
+    - docker-compose build
+    - docker-compose push 
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' &&  $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
+
+
+deploy:
+  stage: deploy
+  script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir /root/.ssh/
+    - chmod 700 /root/.ssh/
+    - ssh-keyscan -H $SERVER_IP >> /root/.ssh/known_hosts
+    - docker login cr.selcloud.ru -u token -p $CR_TOKEN
+    - echo "RELEASE=$RELEASE" >> .env
+    - docker-compose -H "ssh://$SERVER_USER@$SERVER_IP" down
+    - docker-compose -H "ssh://$SERVER_USER@$SERVER_IP" pull
+    - docker-compose -H "ssh://$SERVER_USER@$SERVER_IP" up -d
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' &&  $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
+  when: on_success
+#some_comment
