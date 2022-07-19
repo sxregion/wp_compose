@@ -12,6 +12,6 @@ Unpack your website files backup in ./webserver/website folder.
 
 In .env file stored a lot of default environments. Look at MAIN_DOMAIN_NAME - its domain of your website that used to access via traefik.  
 
-
+You can use gitlab to automate CI/CD process. Just configure infrastructure (Docker), register runner, add secrets and variables and enjoy working pipeline!
 
 
